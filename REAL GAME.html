@@ -88,7 +88,7 @@
         }
         .tooltip .tooltiptext {
             visibility: hidden;
-            width: 120px;
+            width: 180px; /* Adjusted width for longer text */
             background-color: #555;
             color: #fff;
             text-align: center;
@@ -98,7 +98,7 @@
             z-index: 1;
             bottom: 100%; /* Position above the button */
             left: 50%;
-            margin-left: -60px;
+            margin-left: -90px; /* Adjusted for new width */
             opacity: 0;
             transition: opacity 0.3s;
         }
@@ -150,11 +150,26 @@
             <button id="autoClickerBtn">Buy Auto Clicker (Cost: 100 Pizzas) <span id="autoClickerCount">0</span></button>
             <span class="tooltiptext">Auto Clickers Owned: <span id="autoClickerTotal">0</span></span>
         </div>
-        <button id="multiClickerBtn">Buy Multi Clicker (Cost: 500 Pizzas)</button>
-        <button id="ovenBtn" class="upgrade">Buy Oven (Cost: 1000 Pizzas)</button>
-        <button id="deliveryBtn" class="upgrade">Buy Delivery Service (Cost: 5000 Pizzas)</button>
-        <button id="advertisementBtn" class="upgrade">Buy Advertisements (Cost: 10000 Pizzas)</button>
-        <button id="chefBtn" class="upgrade">Hire Chef (Cost: 20000 Pizzas)</button>
+        <div class="tooltip">
+            <button id="multiClickerBtn">Buy Multi Clicker (Cost: 500 Pizzas)</button>
+            <span class="tooltiptext">Increases click value by 2x for every click.</span>
+        </div>
+        <div class="tooltip">
+            <button id="ovenBtn" class="upgrade">Buy Oven (Cost: 1000 Pizzas)</button>
+            <span class="tooltiptext">Increases pizza production by 2 pizzas per second.</span>
+        </div>
+        <div class="tooltip">
+            <button id="deliveryBtn" class="upgrade">Buy Delivery Service (Cost: 5000 Pizzas)</button>
+            <span class="tooltiptext">Earn 5 extra pizzas per second from deliveries.</span>
+        </div>
+        <div class="tooltip">
+            <button id="advertisementBtn" class="upgrade">Buy Advertisements (Cost: 10000 Pizzas)</button>
+            <span class="tooltiptext">Generate 10 extra pizzas per second through ads.</span>
+        </div>
+        <div class="tooltip">
+            <button id="chefBtn" class="upgrade">Hire Chef (Cost: 20000 Pizzas)</button>
+            <span class="tooltiptext">Hire a chef to cook 20 extra pizzas per second.</span>
+        </div>
     </div>
 
     <div class="tooltip">
@@ -358,3 +373,4 @@
     </script>
 </body>
 </html>
+
