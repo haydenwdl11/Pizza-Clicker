@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza Clicker</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f3e6d7;
+            font-family: 'Arial', sans-serif;
+            position: relative;
+        }
+        h1 {
+            color: #d84e1b;
+            font-size: 48px;
+        }
+        #pizza {
+            width: 200px;
+            height: 200px;
+            background-image: url('https://example.com/pizza-image.png'); /* Replace with a pizza image URL */
+            background-size: cover;
+            cursor: pointer;
+            margin-bottom: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        #pizza:hover {
+            transform: scale(1.1);
+        }
+        #score, #level {
+            font-size: 24px;
+            color: #333;
+            margin: 10px 0;
+        }
+        #progress {
+            width: 300px;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        #progressBar {
+            height: 100%;
+            background-color: #d84e1b;
+            width: 0;
+            transition: width 0.3s;
+        }
+        #upgrades, #battlePass {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #d84e1b;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #a63814;
+        }
+        .upgrade {
+            background-color: #5d9b7f;
+        }
+        .upgrade:hover {
+            background-color: #3e6f5c;
+        }
+        #battlePass {
+            display: none;
+            margin-top: 20px;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 100%; /* Position above the button */
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        #levelUpMessage {
+            position: absolute;
+            top: 20%;
+            font-size: 48px;
+            color: red;
+            display: none;
+            z-index: 10;
+        }
+        .confetti {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            overflow: hidden;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ff0;
+            opacity: 0.9;
+            animation: fall 1s infinite;
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Pizza Clicker</h1>
+    <div id="pizza"></div>
+    <div id="level">Level: 1</div>
+    <div id="score">Pizzas: 0</div>
+    <div id="progress">
+        <div id="progressBar"></div>
+    </div>
+    <div id="upgrades">
+        <div class="tooltip">
+            <button id="autoClickerBtn">Buy Auto Clicker (Cost: 100 Pizzas) <span id="autoClickerCount">0</span></button>
+            <span class="tooltiptext">Auto Clickers Owned: <span id="autoClickerTotal">0</span></span>
+        </div>
+        <button id="multiClickerBtn">Buy Multi Clicker (Cost: 500 Pizzas)</button>
+        <button id="ovenBtn" class="upgrade">Buy Oven (Cost: 1000 Pizzas)</button>
+        <button id="deliveryBtn" class="upgrade">Buy Delivery Service (Cost: 5000 Pizzas)</button>
+        <button id="advertisementBtn" class="upgrade">Buy Advertisements (Cost: 10000 Pizzas)</button>
+        <button id="chefBtn" class="upgrade">Hire Chef (Cost: 20000 Pizzas)</button>
+    </div>
+
+    <div class="tooltip">
+        <button id="battlePassToggle">Battle Pass</button>
+        <span class="tooltiptext">Battle Pass Points: <span id="battlePassPoints">0</span></span>
+    </div>
+    <div id="battlePass">
+        <button id="speedUpgradeBtn">25% Faster Auto Clicker (Cost: 5 Battle Pass Points)</button>
+        <button id="extraAutoClickerBtn">Buy 2 Extra Auto Clickers (Cost: 10 Battle Pass Points)</button>
+    </div>
+
+    <div id="levelUpMessage">Level Up!</div>
+    <div class="confetti" id="confetti"></div>
+
+    <script>
+        let pizzas = 0;
+        let progress = 0;
+        let level = 1;
+        let autoClickerCost = 100;
+        let multiClickerCost = 500;
+        let ovenCost = 1000;
+        let deliveryCost = 5000;
+        let advertisementCost = 10000;
+        let chefCost = 20000;
+        let autoClickers = 0;
+        let multiClickers = 0;
+        let ovens = 0;
+        let deliveryServices = 0;
+        let advertisements = 0;
+        let chefs = 0;
+        let battlePassPoints = 0;
+        let autoClickerSpeedMultiplier = 1;
+
+        const pizzaElement = document.getElementById('pizza');
+        const scoreElement = document.getElementById('score');
+        const progressBar = document.getElementById('progressBar');
+        const autoClickerCount = document.getElementById('autoClickerCount');
+        const autoClickerTotal = document.getElementById('autoClickerTotal');
+        const levelElement = document.getElementById('level');
+        const battlePassPointsElement = document.getElementById('battlePassPoints');
+        const battlePassSection = document.getElementById('battlePass');
+        const levelUpMessage = document.getElementById('levelUpMessage');
+        const confettiContainer = document.getElementById('confetti');
+
+        pizzaElement.addEventListener('click', () => {
+            pizzas += (1 + multiClickers);
+            progress += 1;
+            updateScore();
+            updateProgressBar();
+
+            if (progress >= 100) {
+                levelUp();
+            }
+        });
+
+        function levelUp() {
+            progress = 0;
+            level++;
+            pizzas += 5; // Reward for leveling up
+            updateScore();
+            levelElement.textContent = `Level: ${level}`;
+            levelUpMessage.style.display = 'block';
+            setTimeout(() => levelUpMessage.style.display = 'none', 2000);
+            createConfetti();
+            spawnPizzas();
+            battlePassPoints += 1; // Award Battle Pass point on level up
+            battlePassPointsElement.textContent = battlePassPoints;
+            battlePassSection.style.display = "block"; // Show battle pass section
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 100; i++) {
+                const confettiPiece = document.createElement('div');
+                confettiPiece.classList.add('confetti-piece');
+                confettiPiece.style.backgroundColor = getRandomColor();
+                confettiPiece.style.left = `${Math.random() * 100}vw`;
+                confettiPiece.style.animationDuration = `${Math.random() * 1 + 0.5}s`;
+                confettiContainer.appendChild(confettiPiece);
+                setTimeout(() => {
+                    confettiPiece.remove();
+                }, 2000);
+            }
+        }
+
+        function getRandomColor() {
+            const colors = ['#ff0', '#f00', '#0f0', '#00f', '#ff00ff', '#00ffff'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function spawnPizzas() {
+            for (let i = 0; i < 5; i++) {
+                const pizzaDrop = document.createElement('div');
+                pizzaDrop.style.width = '30px';
+                pizzaDrop.style.height = '30px';
+                pizzaDrop.style.backgroundColor = '#d84e1b';
+                pizzaDrop.style.position = 'absolute';
+                pizzaDrop.style.borderRadius = '50%';
+                pizzaDrop.style.left = `${Math.random() * 100}vw`;
+                pizzaDrop.style.top = `${Math.random() * 100}vh`;
+                document.body.appendChild(pizzaDrop);
+
+                pizzaDrop.addEventListener('click', () => {
+                    pizzas += 100;
+                    updateScore();
+                    pizzaDrop.remove();
+                });
+
+                setTimeout(() => {
+                    pizzaDrop.remove();
+                }, 5000); // Remove pizza drop after 5 seconds
+            }
+        }
+
+        document.getElementById('autoClickerBtn').addEventListener('click', () => {
+            if (pizzas >= autoClickerCost) {
+                pizzas -= autoClickerCost;
+                autoClickers++;
+                autoClickerCount.textContent = autoClickers;
+                autoClickerTotal.textContent = autoClickers;
+                autoClickerCost = Math.floor(autoClickerCost * 1.5);
+                updateScore();
+            }
+        });
+
+        document.getElementById('multiClickerBtn').addEventListener('click', () => {
+            if (pizzas >= multiClickerCost) {
+                pizzas -= multiClickerCost;
+                multiClickers++;
+                multiClickerCost = Math.floor(multiClickerCost * 1.5);
+                updateScore();
+            }
+        });
+
+        document.getElementById('ovenBtn').addEventListener('click', () => {
+            if (pizzas >= ovenCost) {
+                pizzas -= ovenCost;
+                ovens++;
+                ovenCost = Math.floor(ovenCost * 1.5);
+                updateScore();
+            }
+        });
+
+        document.getElementById('deliveryBtn').addEventListener('click', () => {
+            if (pizzas >= deliveryCost) {
+                pizzas -= deliveryCost;
+                deliveryServices++;
+                deliveryCost = Math.floor(deliveryCost * 1.5);
+                updateScore();
+            }
+        });
+
+        document.getElementById('advertisementBtn').addEventListener('click', () => {
+            if (pizzas >= advertisementCost) {
+                pizzas -= advertisementCost;
+                advertisements++;
+                advertisementCost = Math.floor(advertisementCost * 1.5);
+                updateScore();
+            }
+        });
+
+        document.getElementById('chefBtn').addEventListener('click', () => {
+            if (pizzas >= chefCost) {
+                pizzas -= chefCost;
+                chefs++;
+                chefCost = Math.floor(chefCost * 1.5);
+                updateScore();
+            }
+        });
+
+        document.getElementById('speedUpgradeBtn').addEventListener('click', () => {
+            if (battlePassPoints >= 5) {
+                battlePassPoints -= 5;
+                autoClickerSpeedMultiplier += 0.25; // Increase speed by 25%
+                battlePassPointsElement.textContent = battlePassPoints;
+                alert("Auto Clicker Speed Increased!");
+            }
+        });
+
+        document.getElementById('extraAutoClickerBtn').addEventListener('click', () => {
+            if (battlePassPoints >= 10) {
+                battlePassPoints -= 10;
+                autoClickers += 2; // Give 2 extra auto clickers
+                autoClickerCount.textContent = autoClickers;
+                battlePassPointsElement.textContent = battlePassPoints;
+                alert("You received 2 Extra Auto Clickers!");
+            }
+        });
+
+        setInterval(() => {
+            pizzas += Math.floor(autoClickers * autoClickerSpeedMultiplier) + ovens * 2 + deliveryServices * 5 + advertisements * 10 + chefs * 20; // Gain pizzas from all upgrades
+            updateScore();
+        }, 1000); // Update every second
+
+        function updateScore() {
+            scoreElement.textContent = `Pizzas: ${pizzas}`;
+        }
+
+        function updateProgressBar() {
+            progressBar.style.width = `${progress}%`;
+        }
+    </script>
+</body>
+</html>
